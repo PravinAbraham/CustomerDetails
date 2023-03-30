@@ -13,7 +13,6 @@
             Data = data;
         }
         public T Data { get; set; }
-        //dfsdfs
         public bool Succeeded { get; set; }
         public string[] Errors { get; set; }
         public string Message { get; set; }
