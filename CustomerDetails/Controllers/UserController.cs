@@ -26,16 +26,16 @@ namespace CustomerDetails.Controllers
 
 
         [AllowAnonymous]
-        [HttpPost("Authenticate")]
+        [HttpPost("AdminLogin")]
         public IActionResult Authenticate([FromBody] UserJWT userJWT) 
         {
-            var _user = _context.Customers.FirstOrDefault(o => o.FirstName == userJWT.username && o.LastName == userJWT.password);
+            var _user = _context.Customers.FirstOrDefault(o => "Admin@123.com" == userJWT.Email && "admin123" == userJWT.password);
             if (_user == null) 
                 return Unauthorized();
             
-            var tokenhandler = new JwtSecurityTokenHandler(); //Creating And Validating JWT Tokens
+            var tokenhandler = new JwtSecurityTokenHandler(); 
             var tokenkey = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
-            var tokenDescriptor = new SecurityTokenDescriptor //AdditionalHeaderClaims
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(
                     new Claim[]
@@ -43,8 +43,35 @@ namespace CustomerDetails.Controllers
                         new Claim(ClaimTypes.Name,_user.LastName),
                     }
                 ),
-                Expires = DateTime.Now.AddMinutes(2),// Token Expires time
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenkey),SecurityAlgorithms.HmacSha256) //A SecurityToken designed for representing a JSON Web Token
+                Expires = DateTime.Now.AddMinutes(2),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenkey),SecurityAlgorithms.HmacSha256)
+            };
+            var token = tokenhandler.CreateToken(tokenDescriptor);
+            string finaltoken = tokenhandler.WriteToken(token);
+
+            return Ok(finaltoken);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("CustomerLogin")]
+        public IActionResult EmpAuthenticate([FromBody] UserJWT userJWT)
+        {
+            var _user = _context.Customers.FirstOrDefault(o => o.Email == userJWT.Email && o.LastName == userJWT.password);
+            if (_user == null)
+                return Unauthorized();
+
+            var tokenhandler = new JwtSecurityTokenHandler();
+            var tokenkey = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(
+                    new Claim[]
+                    {
+                        new Claim(ClaimTypes.Name,_user.Contact),
+                    }
+                ),
+                Expires = DateTime.Now.AddMinutes(2),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenkey), SecurityAlgorithms.HmacSha256)
             };
             var token = tokenhandler.CreateToken(tokenDescriptor);
             string finaltoken = tokenhandler.WriteToken(token);
