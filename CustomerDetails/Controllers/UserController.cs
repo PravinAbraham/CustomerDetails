@@ -56,7 +56,7 @@ namespace CustomerDetails.Controllers
         [HttpPost("CustomerLogin")]
         public IActionResult EmpAuthenticate([FromBody] UserJWT userJWT)
         {
-            var _user = _context.Customers.FirstOrDefault(o => o.Email == userJWT.Email && o.LastName == userJWT.password);
+            var _user = _context.Customers.FirstOrDefault(o => o.Email == userJWT.Email && o.FirstName == userJWT.password);
             if (_user == null)
                 return Unauthorized();
 
@@ -67,7 +67,7 @@ namespace CustomerDetails.Controllers
                 Subject = new ClaimsIdentity(
                     new Claim[]
                     {
-                        new Claim(ClaimTypes.Name,_user.Contact),
+                        new Claim(ClaimTypes.Name,_user.FirstName),
                     }
                 ),
                 Expires = DateTime.Now.AddMinutes(2),
